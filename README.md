@@ -1,38 +1,87 @@
-# KanMind Frontend Project
+# KanMind Backend
 
-![KanMind Logo](assets/icons/logo_icon.svg)
+This repository contains the Django backend for the KanMind frontend. The frontend is maintained separately and is intentionally not part of this repository.
 
-Dieses Projekt ist ein einfaches Frontend, das mit **Vanilla JavaScript** (reines JavaScript ohne Frameworks) erstellt wurde. Es wurde speziell entwickelt, um Schülern der **Developer Akademie** mit Backend-Erfahrung den Einstieg in kleinere Frontend-Anpassungen zu erleichtern.
+## Current Status
 
----
+The project is currently a Django 6.1.1 backend foundation. The database models, authentication flow, board API, and task API still need to be implemented and connected to the separate frontend. At the moment, Django's default admin route is the only registered application route.
 
-## Voraussetzungen
+## Requirements
 
-- Ein funktionierendes Django-Backend (`KanMind`), das **nicht** in diesem Projekt enthalten ist.
-- Visual Studio Code mit der **Live Server**-Erweiterung oder eine ähnliche Möglichkeit, die `index.html` auf oberster Ebene lokal im Browser zu starten.
+- Python 3.13 or a compatible Python version supported by Django 6.1
+- Git
+- The separate KanMind frontend repository, when testing frontend integration
 
----
+## Setup
 
-## Nutzung
+From the repository root, create and activate a virtual environment:
 
-1. Stelle sicher, dass das Backend `KanMind` läuft.
-2. Öffne dieses Projekt in **Visual Studio Code**.
-3. Rechtsklicke auf die Datei `index.html` auf oberster Ebene und wähle **Open with Live Server**, um das Projekt zu starten.
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+```
 
----
+Install the pinned dependencies:
 
-## Ziel des Projekts
+```powershell
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
 
-Dieses Frontend wurde bewusst mit **Vanilla JavaScript** erstellt, um die folgenden Ziele zu erreichen:
+Create the local database and apply migrations:
 
-- **Einfacher Einstieg**: Durch den Verzicht auf Frameworks wie React oder Angular bleibt der Code leicht verständlich und nachvollziehbar auch bei wenig Frontend-Erfahrung.
-- **Lernen durch Anpassung**: Schüler können den Code anpassen, um kleine Änderungen vorzunehmen und Frontend-Konzepte besser zu verstehen.
-- **Backend-Erweiterung**: Das Projekt lässt sich einfach an das bestehende Django-Backend `KanMind` anbinden.
+```powershell
+python manage.py migrate
+```
 
----
+Start the development server:
 
-## Hinweis
+```powershell
+python manage.py runserver
+```
 
-Dieses Projekt ist **ausschließlich für Schüler der Developer Akademie** gedacht und nicht zur freien Nutzung oder Weitergabe freigegeben.
+The backend is then available at `http://127.0.0.1:8000/`. The Django admin is available at `http://127.0.0.1:8000/admin/`.
 
----
+Create an admin user when needed:
+
+```powershell
+python manage.py createsuperuser
+```
+
+## Testing and Checks
+
+Run Django's system checks and the test suite with:
+
+```powershell
+python manage.py check
+python manage.py test
+```
+
+## Project Structure
+
+```text
+KanMind/
+	auth/       Authentication app
+	boards/     Board app
+	tasks/      Task app
+	settings.py Django settings
+	urls.py     Root URL configuration
+manage.py     Django command-line entry point
+requirements.txt
+```
+
+The `auth`, `boards`, and `tasks` apps are currently scaffolds for the backend implementation.
+
+## Frontend Integration
+
+The frontend is kept in a separate repository. Run this backend first, then configure the frontend's API base URL to point to the local server. API routes will be added as the backend implementation progresses.
+
+## Database and Local Files
+
+The development SQLite database is created locally as `db.sqlite3`. Database files, virtual environments, environment files, logs, Python caches, and local frontend files are ignored by Git and must never be committed to GitHub.
+
+For production, use environment variables for secrets and a production database instead of the local SQLite database. Never publish credentials or secret keys.
+
+## License
+
+This project is intended for the Developer Akademie course environment and is not intended for unrestricted redistribution.

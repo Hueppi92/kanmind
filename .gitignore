@@ -26,3 +26,11 @@ db.sqlite3
 .idea/
 .DS_Store
 Thumbs.db
+
+# Frontend checkout (kept locally, not part of this backend repository)
+/assets/
+/pages/
+/shared/
+/index.html
+/script.js
+/styles.css
