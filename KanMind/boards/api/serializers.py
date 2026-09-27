@@ -1,5 +1,5 @@
 from rest_framework import serializers
-
+from django.contrib.auth.models import User
 from KanMind.boards.models import Board
 
 
@@ -11,4 +11,5 @@ class BoardSerializer(serializers.ModelSerializer):
         model = Board
         fields = ('id', 'owner', 'title', 'members', 'member_count')
         read_only_fields = ('owner', 'member_count')
+
 

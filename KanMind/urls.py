@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('KanMind.auth.api.urls')),
     path('api/boards/', include('KanMind.boards.api.urls')),
+   
 ]

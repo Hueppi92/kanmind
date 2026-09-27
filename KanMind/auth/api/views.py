@@ -1,8 +1,11 @@
 from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 
-from .serializers import LoginSerializer, RegistrationSerializer
+from .serializers import LoginSerializer, RegistrationSerializer, EmailCheckSerializer
 
 
 class RegistrationView(generics.CreateAPIView):
@@ -39,6 +42,26 @@ class LoginView(generics.GenericAPIView):
                 'user_id': user.id,
                 'email': user.email,
                 'fullname': f"{user.first_name} {user.last_name}",
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+class EmailCheckView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = EmailCheckSerializer
+
+    def get(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        user = get_user_model().objects.filter(email__iexact=email).exists()
+        serializer.validated_data['user'] = user
+        return Response(
+            {
+                'id': get_user_model().objects.get(email__iexact=email).id,
+                'email': email,
+                'fullname': f"{get_user_model().objects.get(email__iexact=email).first_name} {get_user_model().objects.get(email__iexact=email).last_name}",
             },
             status=status.HTTP_200_OK
         )
