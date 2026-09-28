@@ -20,7 +20,7 @@ class Task(models.Model):
     ], default='medium')
     assignee = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.SET_NULL, related_name='assigned_tasks')
     reviewer = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='reviewed_tasks', on_delete=models.SET_NULL)
-    due_date = models.DateTimeField(blank=True, null=True)
+    due_date = models.DateField(blank=True, null=True)
     comments_count = models.IntegerField(default=0)
 
     def __str__(self):

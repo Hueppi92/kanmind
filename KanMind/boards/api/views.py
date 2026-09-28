@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -6,6 +6,7 @@ from rest_framework.response import Response
 
 from KanMind.boards.models import Board
 from KanMind.boards.api.serializers import BoardSerializer
+
 
 
 def _boards_with_member_count():
@@ -16,6 +17,7 @@ def _boards_with_member_count():
 def board_list(request):
     if request.method == 'GET':
         boards = _boards_with_member_count()
+        boards = boards.filter(Q(members=request.user) | Q(owner=request.user)).distinct()
         serializer = BoardSerializer(boards, many=True)
         return Response(serializer.data)
 
