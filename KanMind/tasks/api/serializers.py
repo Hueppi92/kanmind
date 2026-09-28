@@ -12,7 +12,7 @@ class TaskUserSerializer(serializers.ModelSerializer):
     fullname = serializers.CharField(source='get_full_name', read_only=True)
 
 
-class TaskSerializer(serializers.ModelSerializer):
+class TaskSerializerAssigned(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ('id', 'board', 'title', 'description', 'status', 'priority',  'due_date', 'assignee','assignee_id', 'reviewer', 'reviewer_id')
