@@ -72,3 +72,4 @@ class LoginSerializer(serializers.Serializer):
 class EmailCheckSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
+
