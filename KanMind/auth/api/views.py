@@ -1,6 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.http import JsonResponse
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
@@ -16,7 +17,7 @@ class RegistrationView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        return Response(
+        return JsonResponse(
             {
                 'token': user.auth_token.key,
                 'user_id': user.id,
@@ -36,7 +37,7 @@ class LoginView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
-        return Response(
+        return JsonResponse(
             {
                 'token': token.key,
                 'user_id': user.id,
@@ -55,13 +56,14 @@ class EmailCheckView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
-        user = get_user_model().objects.filter(email__iexact=email).exists()
-        serializer.validated_data['user'] = user
-        return Response(
+        user = get_object_or_404(get_user_model(), email__iexact=email)
+
+     
+        return JsonResponse(
             {
-                'id': get_user_model().objects.get(email__iexact=email).id,
+                'id': user.id,
                 'email': email,
-                'fullname': f"{get_user_model().objects.get(email__iexact=email).first_name} {get_user_model().objects.get(email__iexact=email).last_name}",
+                'fullname': f"{user.first_name} {user.last_name}",
             },
             status=status.HTTP_200_OK
         )
