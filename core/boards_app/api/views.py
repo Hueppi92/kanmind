@@ -4,8 +4,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from core.boards.models import Board
-from core.boards.api.serializers import BoardSerializer
+from core.boards_app.models import Board
+from core.boards_app.api.serializers import BoardSerializer
 
 
 

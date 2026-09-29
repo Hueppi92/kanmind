@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from ..boards.models import Board
+from ..boards_app.models import Board
 # Create your models here.
 class Task(models.Model):
    

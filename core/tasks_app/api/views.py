@@ -5,8 +5,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.http import JsonResponse
-from core.tasks.api.serializers import TaskSerializer, CommentSerializer
-from core.tasks.models import Task
+from core.tasks_app.api.serializers import TaskSerializer, CommentSerializer
+from core.tasks_app.models import Task
 
 @api_view(['GET',])
 @permission_classes([IsAuthenticated])
@@ -53,7 +53,7 @@ def task_detail(request, pk):
 
     if request.method == 'DELETE':
         task.delete()
-        return JsonResponse({}, status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     serializer = TaskSerializer(
         task,
@@ -92,6 +92,6 @@ def task_comment_detail(request, pk, comment_id):
         if comment.author != request.user:
             return JsonResponse({'detail': 'You do not have permission to delete this comment.'}, status=status.HTTP_403_FORBIDDEN)
         comment.delete()
-        return JsonResponse({}, status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     return JsonResponse({'detail': 'Method not allowed.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)

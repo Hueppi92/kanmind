@@ -61,9 +61,9 @@ python manage.py test
 
 ```text
 core/
-	auth/       Authentication API
-	boards/     Board models and API
-	tasks/      Task and comment models and API
+	auth_app/   Authentication API
+	boards_app/ Board models and API
+	tasks_app/  Task and comment models and API
 	settings.py Django settings
 	urls.py     Root URL configuration
 manage.py     Django command-line entry point

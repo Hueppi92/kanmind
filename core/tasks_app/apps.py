@@ -2,4 +2,5 @@ from django.apps import AppConfig
 
 
 class TasksConfig(AppConfig):
-    name = 'core.tasks'
+    name = 'core.tasks_app'
+    label = 'tasks'
