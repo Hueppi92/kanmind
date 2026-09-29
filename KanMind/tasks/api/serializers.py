@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from KanMind.boards.models import Board
-from ..models import Task
+from ..models import Task, Comment
 
 
 class TaskUserSerializer(serializers.ModelSerializer):
@@ -40,3 +40,11 @@ class TaskSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "Reviewer must be a member of the board.")
         return attrs
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('id', 'created_at', 'author', 'content')
+
+    author = serializers.CharField(source='author.get_full_name', read_only=True)
+  
