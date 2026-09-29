@@ -18,6 +18,8 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = ('id', 'board', 'title', 'description', 'status', 'priority',  'due_date',
                   'assignee', 'assignee_id', 'reviewer', 'reviewer_id', 'comments_count')
     comments_count = serializers.IntegerField(read_only=True)
+    board = serializers.PrimaryKeyRelatedField(
+        queryset=Board.objects.all(), required=True)
     assignee = TaskUserSerializer(read_only=True)
     reviewer = TaskUserSerializer(read_only=True)
     assignee_id = serializers.PrimaryKeyRelatedField(
@@ -26,7 +28,8 @@ class TaskSerializer(serializers.ModelSerializer):
         source='reviewer', queryset=User.objects.all(), required=False, allow_null=True, write_only=True)
 
     def validate(self, attrs):
-        board = attrs['board']
+        board = attrs.get('board', None)
+       
         if 'assignee' in attrs:
             if attrs['assignee'] is not None and not board.members.filter(pk=attrs['assignee'].pk).exists():
                 raise serializers.ValidationError(

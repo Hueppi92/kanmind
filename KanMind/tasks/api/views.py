@@ -24,7 +24,7 @@ def review_tasks(request):
         return Response(serializer.data)
 
 
-@api_view(['POST'])
+@api_view(['POST', 'PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def create_task(request):
     if request.method == 'POST':
@@ -40,3 +40,26 @@ def create_task(request):
            serializer.save()
            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def task_detail(request, pk):
+    task = get_object_or_404(Task, pk=pk)
+
+    if request.method == 'GET':
+        return Response(TaskSerializer(task).data)
+
+    if request.method == 'DELETE':
+        task.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    serializer = TaskSerializer(
+        task,
+        data=request.data,
+        partial=request.method == 'PATCH',
+    )
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    task = Task.objects.get(pk=pk)
+    return Response(TaskSerializer(task).data)
