@@ -1,7 +1,10 @@
 from django.db.models import Count, Q
+
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets
 from rest_framework.response import Response
 
 from core.boards_app.models import Board
@@ -13,7 +16,18 @@ def _boards_with_member_count():
     return Board.objects.annotate(member_count=Count('members', distinct=True))
 
 
-@api_view(['GET', 'POST'])
+class BoardViewSet(viewsets.ModelViewSet):
+    queryset = Board.objects.all()
+    serializer_class = BoardSerializer  
+    permission_classes = [IsAuthenticated]
+        
+    def get_queryset(self):
+          return _boards_with_member_count().filter(Q(members=self.request.user) | Q(owner=self.request.user)).distinct()
+    
+    def perform_create(self, serializer):
+     serializer.save(owner=self.request.user)
+
+""" @api_view(['GET', 'POST'])
 def board_list(request):
     if request.method == 'GET':
         boards = _boards_with_member_count()
@@ -47,4 +61,4 @@ def board_detail(request, pk):
     serializer.is_valid(raise_exception=True)
     serializer.save()
     board = _boards_with_member_count().get(pk=pk)
-    return Response(BoardSerializer(board).data)
+    return Response(BoardSerializer(board).data) """

@@ -1,9 +1,16 @@
 from django.urls import path
-
-from .views import board_detail, board_list
+from .views import BoardViewSet
 
 urlpatterns = [
-	path('', board_list, name='board-list'),
-	path('<int:pk>/', board_detail, name='board-detail'),
-	
+    path('', BoardViewSet.as_view({'get': 'list', 'post': 'create'}), name='board-list'),
+    path(
+        '<int:pk>/',
+        BoardViewSet.as_view({
+            'get': 'retrieve',
+            'put': 'update',
+            'patch': 'partial_update',
+            'delete': 'destroy',
+        }),
+        name='board-detail',
+    ),
 ]
