@@ -4,8 +4,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from KanMind.boards.models import Board
-from KanMind.boards.api.serializers import BoardSerializer
+from core.boards.models import Board
+from core.boards.api.serializers import BoardSerializer
 
 
 

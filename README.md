@@ -4,7 +4,7 @@ This repository contains the Django backend for the KanMind frontend. The fronte
 
 ## Current Status
 
-The project is currently a Django 6.1.1 backend foundation. The database models, authentication flow, board API, and task API still need to be implemented and connected to the separate frontend. At the moment, Django's default admin route is the only registered application route.
+The backend provides authentication, board, and task APIs. Task endpoints include assigned/reviewing lists and task comments. Authenticated endpoints use token authentication.
 
 ## Requirements
 
@@ -60,21 +60,19 @@ python manage.py test
 ## Project Structure
 
 ```text
-KanMind/
-	auth/       Authentication app
-	boards/     Board app
-	tasks/      Task app
+core/
+	auth/       Authentication API
+	boards/     Board models and API
+	tasks/      Task and comment models and API
 	settings.py Django settings
 	urls.py     Root URL configuration
 manage.py     Django command-line entry point
 requirements.txt
 ```
 
-The `auth`, `boards`, and `tasks` apps are currently scaffolds for the backend implementation.
-
 ## Frontend Integration
 
-The frontend is kept in a separate repository. Run this backend first, then configure the frontend's API base URL to point to the local server. API routes will be added as the backend implementation progresses.
+The frontend is kept in a separate repository. Run this backend first, then configure the frontend's API base URL to point to the local server.
 
 ## Database and Local Files
 
