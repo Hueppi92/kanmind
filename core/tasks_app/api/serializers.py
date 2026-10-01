@@ -28,7 +28,11 @@ class TaskSerializer(serializers.ModelSerializer):
         source='reviewer', queryset=User.objects.all(), required=False, allow_null=True, write_only=True)
 
     def validate(self, attrs):
-        board = attrs.get('board', None)
+        board = attrs.get('board', self.instance.board if self.instance else None)
+        if self.instance and 'board' in attrs and board.pk != self.instance.board_id:
+            raise serializers.ValidationError(
+                {'board': 'Changing the task board is not allowed.'}
+            )
        
         if 'assignee' in attrs:
             if attrs['assignee'] is not None and not board.members.filter(pk=attrs['assignee'].pk).exists():

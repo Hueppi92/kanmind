@@ -9,6 +9,7 @@ from rest_framework.response import Response
 
 from core.boards_app.models import Board
 from core.boards_app.api.serializers import BoardSerializer
+from core.permissions import IsMemberOrOwner, IsOwner
 
 
 
@@ -20,6 +21,15 @@ class BoardViewSet(viewsets.ModelViewSet):
     queryset = Board.objects.all()
     serializer_class = BoardSerializer  
     permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action == 'destroy':
+            permission_classes = [IsOwner]
+        elif self.action in ('retrieve', 'update', 'partial_update'):
+            permission_classes = [IsMemberOrOwner]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
         
     def get_queryset(self):
           return _boards_with_member_count().filter(Q(members=self.request.user) | Q(owner=self.request.user)).distinct()

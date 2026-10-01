@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -7,6 +7,14 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 from core.tasks_app.api.serializers import TaskSerializer, CommentSerializer
 from core.tasks_app.models import Task
+from rest_framework import viewsets
+from core.permissions import (
+    IsCreatorOfComment,
+    IsMember,
+    IsMemberOfTask,
+    IsMemberOrOwner,
+    IsTaskCreatorOrBoardOwner,
+)
 
 @api_view(['GET',])
 @permission_classes([IsAuthenticated])
@@ -25,48 +33,36 @@ def review_tasks(request):
         return Response(serializer.data)
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def create_task(request):
-    if request.method == 'POST':
-        serializer = TaskSerializer(data=request.data)
-        if serializer.is_valid():
-           board = serializer.validated_data['board']
-           if not board.members.filter(pk=request.user.pk).exists():
-              return Response(
-                   {'detail': 'You must be a member of this board.'},
-                             status=status.HTTP_403_FORBIDDEN,
-                             )
-           
-           serializer.save()
-           return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    
-@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
-@permission_classes([IsAuthenticated])
-def task_detail(request, pk):
-    task = get_object_or_404(Task, pk=pk)
 
-    if request.method == 'GET':
-        return JsonResponse(TaskSerializer(task).data)
+class TaskViewSet(viewsets.ModelViewSet):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
 
-    if request.method == 'DELETE':
-        task.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            permission_classes = [IsMemberOrOwner]
+        elif self.action in ('create', 'update', 'partial_update'):
+            permission_classes = [IsMember]
+        elif self.action == 'destroy':
+            permission_classes = [IsTaskCreatorOrBoardOwner]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
 
-    serializer = TaskSerializer(
-        task,
-        data=request.data,
-        partial=request.method == 'PATCH',
-    )
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
-    task = Task.objects.get(pk=pk)
-    return JsonResponse(TaskSerializer(task).data)
+    def perform_create(self, serializer):
+        serializer.save(creator=self.request.user)
+
+    def get_queryset(self):
+        allowed_tasks = Q(board__members=self.request.user) | Q(
+            board__owner=self.request.user
+        )
+        if self.action == 'destroy':
+            allowed_tasks |= Q(creator=self.request.user)
+        return Task.objects.filter(allowed_tasks).distinct()
 
 @api_view(['GET','POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsMemberOfTask])
 def task_comments(request, pk):
     task = get_object_or_404(Task, pk=pk)
     if request.method == 'GET':
@@ -81,16 +77,12 @@ def task_comments(request, pk):
     return JsonResponse({'detail': 'Method not allowed.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsMemberOfTask, IsCreatorOfComment])
 def task_comment_detail(request, pk, comment_id):
     task = get_object_or_404(Task, pk=pk)
     comment = get_object_or_404(task.comments, pk=comment_id)
 
     if request.method == 'DELETE':
-        if not comment:
-            return JsonResponse({'detail': 'Comment not found.'}, status=status.HTTP_404_NOT_FOUND)
-        if comment.author != request.user:
-            return JsonResponse({'detail': 'You do not have permission to delete this comment.'}, status=status.HTTP_403_FORBIDDEN)
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
