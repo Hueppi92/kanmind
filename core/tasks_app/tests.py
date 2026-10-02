@@ -59,6 +59,44 @@ class ObjectPermissionStatusTests(APITestCase):
         self.assertEqual(self.client.get('/api/tasks/').data, [])
 
 
+class BoardListResponseTests(APITestCase):
+    def test_board_list_returns_summary_counts_and_owner_id(self):
+        owner = User.objects.create_user(username='summary-owner')
+        first_member = User.objects.create_user(username='summary-member-1')
+        second_member = User.objects.create_user(username='summary-member-2')
+        board = Board.objects.create(title='Projekt X', owner=owner)
+        board.members.add(first_member, second_member)
+        Task.objects.create(board=board, title='Todo high', priority='high')
+        Task.objects.create(board=board, title='Todo medium', priority='medium')
+        Task.objects.create(
+            board=board,
+            title='In progress high',
+            status='in-progress',
+            priority='high',
+        )
+        Task.objects.create(
+            board=board,
+            title='Review',
+            status='review',
+            priority='low',
+        )
+        Task.objects.create(board=board, title='Done', status='done')
+        self.client.force_authenticate(user=owner)
+
+        response = self.client.get('/api/boards/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, [{
+            'id': board.pk,
+            'title': 'Projekt X',
+            'member_count': 2,
+            'ticket_count': 5,
+            'tasks_to_do_count': 2,
+            'tasks_high_prio_count': 2,
+            'owner_id': owner.pk,
+        }])
+
+
 class GuestPermissionTests(APITestCase):
     def setUp(self):
         self.guest = User.objects.create_user(

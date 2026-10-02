@@ -21,11 +21,11 @@ KanMind is a Django REST Framework backend for the KanMind task-management appli
 Run these commands from the repository root in PowerShell:
 
 ```powershell
-py -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python manage.py migrate
+1. py -m venv .venv
+2. .venv\Scripts\Activate.ps1
+3. python -m pip install --upgrade pip
+4. python -m pip install -r requirements.txt
+5. python manage.py migrate
 ```
 
 Start the development server:
@@ -50,7 +50,7 @@ Registration and login are public. All other API endpoints require a DRF token. 
 Authorization: Token <token>
 ```
 
-The account configured by `GUEST_USER_EMAIL` (`kevin@kovacsi.de`, matching
+The account configured by `GUEST_USER_EMAIL` (`guest@kanmindguest.de`, matching
 `GUEST_LOGIN.email` in `shared/js/config.js`) bypasses API permissions and can
 read, create, update, and delete all boards, tasks, and comments. Its email is
 reserved during registration. Use this account only in a trusted demo
