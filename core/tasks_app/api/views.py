@@ -8,17 +8,18 @@ from django.http import JsonResponse
 from core.tasks_app.api.serializers import TaskSerializer, CommentSerializer
 from core.tasks_app.models import Task
 from rest_framework import viewsets
-from core.permissions import (
+from core.boards_app.api.permissions import IsMemberOrOwner
+from core.tasks_app.api.permissions import (
     IsCreatorOfComment,
     IsMember,
     IsMemberOfTask,
-    IsMemberOrOwner,
     IsTaskCreatorOrBoardOwner,
 )
 
 @api_view(['GET',])
 @permission_classes([IsAuthenticated])
 def assigned_tasks(request):
+    """List tasks assigned to the authenticated user."""
     if request.method == 'GET':
         tasks = Task.objects.filter(assignee=request.user)
         serializer = TaskSerializer(tasks, many=True)
@@ -27,6 +28,7 @@ def assigned_tasks(request):
 @api_view(['GET',])
 @permission_classes([IsAuthenticated])
 def review_tasks(request):
+    """List tasks where the authenticated user is the reviewer."""
     if request.method == 'GET':
         tasks = Task.objects.filter(reviewer=request.user)
         serializer = TaskSerializer(tasks, many=True)
@@ -35,6 +37,8 @@ def review_tasks(request):
 
 
 class TaskViewSet(viewsets.ModelViewSet):
+    """Provide task CRUD with board-scoped access and action-specific permissions."""
+
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
@@ -64,6 +68,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 @api_view(['GET','POST'])
 @permission_classes([IsMemberOfTask])
 def task_comments(request, pk):
+    """List comments on a task or create a comment as the authenticated user."""
     task = get_object_or_404(Task, pk=pk)
     if request.method == 'GET':
         comments = task.comments.all()  # Assuming a related name 'comments' for Task's comments
@@ -79,6 +84,7 @@ def task_comments(request, pk):
 @api_view(['DELETE'])
 @permission_classes([IsMemberOfTask, IsCreatorOfComment])
 def task_comment_detail(request, pk, comment_id):
+    """Delete a task comment when the authenticated user is its author."""
     task = get_object_or_404(Task, pk=pk)
     comment = get_object_or_404(task.comments, pk=comment_id)
 

@@ -5,6 +5,7 @@ from ..boards_app.models import Board
 
 
 class Task(models.Model):
+    """A task attached to a board, optionally assigned to users for work and review."""
 
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -40,6 +41,8 @@ class Task(models.Model):
 
 
 class Comment(models.Model):
+    """A comment authored by a user on a task."""
+
     task = models.ForeignKey(
         Task, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(

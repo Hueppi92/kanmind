@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Board(models.Model):
+    """A task board with one owner and an optional set of members."""
+
     title = models.CharField(max_length=255)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,

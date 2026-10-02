@@ -9,6 +9,8 @@ from .serializers import LoginSerializer, RegistrationSerializer, EmailCheckSeri
 
 
 class RegistrationView(generics.CreateAPIView):
+    """Create an account and return its token and public profile fields."""
+
     permission_classes = []
     serializer_class = RegistrationSerializer
 
@@ -17,17 +19,16 @@ class RegistrationView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response(
-            {
-                'token': user.auth_token.key,
+            {   'token': user.auth_token.key,
                 'user_id': user.id,
                 'email': user.email,
-                'fullname': f'{user.first_name} {user.last_name}',
-            },
-            status=status.HTTP_201_CREATED,
+                'fullname': f'{user.first_name} {user.last_name}',},status=status.HTTP_201_CREATED,
         )
 
 
 class LoginView(generics.GenericAPIView):
+    """Authenticate credentials and return the user's token."""
+
     permission_classes = []
     serializer_class = LoginSerializer
 
@@ -48,6 +49,8 @@ class LoginView(generics.GenericAPIView):
 
 
 class EmailCheckView(generics.GenericAPIView):
+    """Return public profile fields for an existing email address."""
+
     permission_classes = [IsAuthenticated]
     serializer_class = EmailCheckSerializer
 

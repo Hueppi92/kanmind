@@ -4,6 +4,8 @@ from core.boards_app.models import Board
 
 
 class BoardSerializer(serializers.ModelSerializer):
+    """Serialize board data while keeping owner and member count read-only."""
+
     PERMISSION_CLASSES = []
     member_count = serializers.IntegerField(read_only=True)
 

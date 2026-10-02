@@ -9,15 +9,18 @@ from rest_framework.response import Response
 
 from core.boards_app.models import Board
 from core.boards_app.api.serializers import BoardSerializer
-from core.permissions import IsMemberOrOwner, IsOwner
+from core.boards_app.api.permissions import IsMemberOrOwner, IsOwner
 
 
 
 def _boards_with_member_count():
+    """Annotate boards with the number of distinct members."""
     return Board.objects.annotate(member_count=Count('members', distinct=True))
 
 
 class BoardViewSet(viewsets.ModelViewSet):
+    """Provide board CRUD while limiting access to owners and members."""
+
     queryset = Board.objects.all()
     serializer_class = BoardSerializer  
     permission_classes = [IsAuthenticated]
@@ -37,38 +40,3 @@ class BoardViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
      serializer.save(owner=self.request.user)
 
-""" @api_view(['GET', 'POST'])
-def board_list(request):
-    if request.method == 'GET':
-        boards = _boards_with_member_count()
-        boards = boards.filter(Q(members=request.user) | Q(owner=request.user)).distinct()
-        serializer = BoardSerializer(boards, many=True)
-        return Response(serializer.data)
-
-    serializer = BoardSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    board = serializer.save(owner=request.user)
-    board = _boards_with_member_count().get(pk=board.pk)
-    return Response(BoardSerializer(board).data, status=status.HTTP_201_CREATED)
-
-
-@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
-def board_detail(request, pk):
-    board = get_object_or_404(_boards_with_member_count(), pk=pk)
-
-    if request.method == 'GET':
-        return Response(BoardSerializer(board).data)
-
-    if request.method == 'DELETE':
-        board.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    serializer = BoardSerializer(
-        board,
-        data=request.data,
-        partial=request.method == 'PATCH',
-    )
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
-    board = _boards_with_member_count().get(pk=pk)
-    return Response(BoardSerializer(board).data) """

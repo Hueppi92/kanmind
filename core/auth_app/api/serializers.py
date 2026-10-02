@@ -10,6 +10,8 @@ User = get_user_model()
 
 
 class RegistrationSerializer(serializers.Serializer):
+    """Validate registration data and create a user with an authentication token."""
+
     fullname = serializers.CharField(max_length=150)
     email = serializers.EmailField()
     password = serializers.CharField(min_length=8, write_only=True)
@@ -53,6 +55,8 @@ class RegistrationSerializer(serializers.Serializer):
         return user
     
 class LoginSerializer(serializers.Serializer):
+    """Authenticate a user by email and password."""
+
     email = serializers.EmailField()
     password = serializers.CharField(min_length=8, write_only=True)
 
@@ -70,6 +74,8 @@ class LoginSerializer(serializers.Serializer):
         return attrs
     
 class EmailCheckSerializer(serializers.Serializer):
+    """Validate the email query parameter used by the lookup endpoint."""
+
     email = serializers.EmailField()
 
 
