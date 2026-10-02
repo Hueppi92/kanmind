@@ -12,23 +12,22 @@ class IsMember(GuestAccessPermissionMixin, IsAuthenticated):
     """Require membership to create or modify tasks on a board."""
 
     def has_permission(self, request, view):
-        if is_guest_user(request.user):
-            return True
-        if not super().has_permission(request, view):
+        is_guest = is_guest_user(request.user)
+        if not is_guest and not super().has_permission(request, view):
             return False
         if getattr(view, "action", None) != "create":
             return True
 
         board_id = request.data.get("board")
         if board_id is None:
-            return False
+            return True
         try:
-            return Board.objects.filter(
-                pk=board_id,
-                members=request.user,
-            ).exists()
+            board = Board.objects.filter(pk=board_id).first()
         except (TypeError, ValueError):
-            return False
+            return True
+        if board is None or is_guest:
+            return True
+        return board.members.filter(pk=request.user.pk).exists()
 
     def _has_non_guest_object_permission(self, request, view, obj):
         board = getattr(obj, "board", None)

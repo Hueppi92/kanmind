@@ -123,6 +123,20 @@ class GuestPermissionTests(APITestCase):
         )
         self.client.force_authenticate(user=self.guest)
 
+    def test_task_creation_returns_404_for_missing_board(self):
+        for user in (self.owner, self.guest):
+            with self.subTest(user=user.username):
+                self.client.force_authenticate(user=user)
+                response = self.client.post(
+                    '/api/tasks/',
+                    {'board': self.board.pk + 1, 'title': 'Orphan task'},
+                    format='json',
+                )
+                self.assertEqual(
+                    response.status_code,
+                    status.HTTP_404_NOT_FOUND,
+                )
+
     def test_guest_can_list_and_modify_boards_and_tasks(self):
         self.assertEqual(len(self.client.get('/api/boards/').data), 1)
         self.assertEqual(len(self.client.get('/api/tasks/').data), 1)

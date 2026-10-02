@@ -4,10 +4,11 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from core.tasks_app.api.serializers import TaskSerializer, CommentSerializer
 from core.tasks_app.models import Task
 from rest_framework import viewsets
+from core.boards_app.models import Board
 from core.boards_app.api.permissions import IsMemberOrOwner
 from core.tasks_app.api.permissions import (
     IsCreatorOfComment,
@@ -58,6 +59,15 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        board_id = request.data.get('board')
+        if board_id is not None:
+            try:
+                get_object_or_404(Board, pk=board_id)
+            except (TypeError, ValueError):
+                raise Http404
+        return super().create(request, *args, **kwargs)
 
     def get_queryset(self):
         if self.action != 'list' or is_guest_user(self.request.user):
