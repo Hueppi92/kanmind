@@ -10,7 +10,7 @@ User = get_user_model()
 
 
 class RegistrationSerializer(serializers.Serializer):
-    """Validate registration data and create a user with an authentication token."""
+    """Validate registration data and create a user with a token."""
 
     fullname = serializers.CharField(max_length=150)
     email = serializers.EmailField()
@@ -21,7 +21,7 @@ class RegistrationSerializer(serializers.Serializer):
         fullname = ' '.join(value.split())
         if len(fullname.split()) < 2:
             raise serializers.ValidationError(
-                'Please provide your first name and last name.'
+                'Please provide your first and last name.'
             )
         return fullname
 
@@ -53,7 +53,8 @@ class RegistrationSerializer(serializers.Serializer):
         )
         Token.objects.create(user=user)
         return user
-    
+
+
 class LoginSerializer(serializers.Serializer):
     """Authenticate a user by email and password."""
 
@@ -72,10 +73,9 @@ class LoginSerializer(serializers.Serializer):
         attrs['email'] = email
         attrs['user'] = user
         return attrs
-    
+
+
 class EmailCheckSerializer(serializers.Serializer):
     """Validate the email query parameter used by the lookup endpoint."""
 
     email = serializers.EmailField()
-
-

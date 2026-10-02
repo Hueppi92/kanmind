@@ -5,7 +5,11 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 
-from .serializers import LoginSerializer, RegistrationSerializer, EmailCheckSerializer
+from .serializers import (
+    EmailCheckSerializer,
+    LoginSerializer,
+    RegistrationSerializer,
+)
 
 
 class RegistrationView(generics.CreateAPIView):
@@ -19,10 +23,13 @@ class RegistrationView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response(
-            {   'token': user.auth_token.key,
+            {
+                'token': user.auth_token.key,
                 'user_id': user.id,
                 'email': user.email,
-                'fullname': f'{user.first_name} {user.last_name}',},status=status.HTTP_201_CREATED,
+                'fullname': f'{user.first_name} {user.last_name}',
+            },
+            status=status.HTTP_201_CREATED,
         )
 
 
@@ -60,7 +67,6 @@ class EmailCheckView(generics.GenericAPIView):
         email = serializer.validated_data['email']
         user = get_object_or_404(get_user_model(), email__iexact=email)
 
-     
         return Response(
             {
                 'id': user.id,

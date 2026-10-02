@@ -36,11 +36,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='board',
             name='members',
-            field=models.ManyToManyField(blank=True, related_name='boards', to=settings.AUTH_USER_MODEL),
+            field=models.ManyToManyField(
+                blank=True, related_name='boards', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='board',
             name='owner',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='OwnedBoards', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='OwnedBoards', to=settings.AUTH_USER_MODEL),
         ),
     ]

@@ -16,6 +16,7 @@ from core.tasks_app.api.permissions import (
     IsTaskCreatorOrBoardOwner,
 )
 
+
 @api_view(['GET',])
 @permission_classes([IsAuthenticated])
 def assigned_tasks(request):
@@ -24,6 +25,7 @@ def assigned_tasks(request):
         tasks = Task.objects.filter(assignee=request.user)
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data)
+
 
 @api_view(['GET',])
 @permission_classes([IsAuthenticated])
@@ -35,9 +37,8 @@ def review_tasks(request):
         return Response(serializer.data)
 
 
-
 class TaskViewSet(viewsets.ModelViewSet):
-    """Provide task CRUD with board-scoped access and action-specific permissions."""
+    """Provide task CRUD with board-scoped permissions."""
 
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
@@ -65,21 +66,36 @@ class TaskViewSet(viewsets.ModelViewSet):
             allowed_tasks |= Q(creator=self.request.user)
         return Task.objects.filter(allowed_tasks).distinct()
 
-@api_view(['GET','POST'])
+
+@api_view(['GET', 'POST'])
 @permission_classes([IsMemberOfTask])
 def task_comments(request, pk):
-    """List comments on a task or create a comment as the authenticated user."""
+    """List task comments or create one as the authenticated user."""
     task = get_object_or_404(Task, pk=pk)
     if request.method == 'GET':
-        comments = task.comments.all()  # Assuming a related name 'comments' for Task's comments
-        return JsonResponse({'comments': [CommentSerializer(comment).data for comment in comments]})
+        # Task.comments is available through the model's related_name.
+        comments = task.comments.all()
+        return JsonResponse(
+            {
+                'comments': [
+                    CommentSerializer(comment).data
+                    for comment in comments
+                ]
+            }
+        )
     if request.method == 'POST':
-            serializer = CommentSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save(task=task, author=request.user)
-                return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
-            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    return JsonResponse({'detail': 'Method not allowed.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(task=task, author=request.user)
+            return JsonResponse(
+                serializer.data,
+                status=status.HTTP_201_CREATED,
+            )
+        return JsonResponse(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+    return JsonResponse({'detail': 'Method not allowed.'},
+                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 
 @api_view(['DELETE'])
 @permission_classes([IsMemberOfTask, IsCreatorOfComment])
@@ -92,4 +108,7 @@ def task_comment_detail(request, pk, comment_id):
         comment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    return JsonResponse({'detail': 'Method not allowed.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    return JsonResponse(
+        {'detail': 'Method not allowed.'},
+        status=status.HTTP_405_METHOD_NOT_ALLOWED,
+    )

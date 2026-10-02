@@ -3,6 +3,8 @@ from django.db import models
 from django.contrib.auth.models import User
 
 # Create your models here.
+
+
 class Board(models.Model):
     """A task board with one owner and an optional set of members."""
 
@@ -14,8 +16,6 @@ class Board(models.Model):
         related_name='OwnedBoards',
     )
     members = models.ManyToManyField(User, related_name='boards', blank=True)
-        
+
     def __str__(self):
         return self.title
-            
-            

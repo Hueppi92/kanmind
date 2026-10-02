@@ -1,11 +1,11 @@
 from django.db import models
 from django.conf import settings
-from ..boards_app.models import Board
+from core.boards_app.models import Board
 # Create your models here.
 
 
 class Task(models.Model):
-    """A task attached to a board, optionally assigned to users for work and review."""
+    """A board task with optional assignee and reviewer."""
 
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -29,10 +29,20 @@ class Task(models.Model):
         ('medium', 'Medium'),
         ('high', 'High')
     ], default='medium')
-    assignee = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True,
-                                 null=True, on_delete=models.SET_NULL, related_name='assigned_tasks')
-    reviewer = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True,
-                                 null=True, related_name='reviewed_tasks', on_delete=models.SET_NULL)
+    assignee = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='assigned_tasks',
+    )
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='reviewed_tasks',
+    )
     due_date = models.DateField(blank=True, null=True)
     comments_count = models.IntegerField(default=0)
 

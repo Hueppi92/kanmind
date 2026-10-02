@@ -12,7 +12,6 @@ from core.boards_app.api.serializers import BoardSerializer
 from core.boards_app.api.permissions import IsMemberOrOwner, IsOwner
 
 
-
 def _boards_with_member_count():
     """Annotate boards with the number of distinct members."""
     return Board.objects.annotate(member_count=Count('members', distinct=True))
@@ -22,7 +21,7 @@ class BoardViewSet(viewsets.ModelViewSet):
     """Provide board CRUD while limiting access to owners and members."""
 
     queryset = Board.objects.all()
-    serializer_class = BoardSerializer  
+    serializer_class = BoardSerializer
     permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
@@ -33,10 +32,16 @@ class BoardViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
-        
-    def get_queryset(self):
-          return _boards_with_member_count().filter(Q(members=self.request.user) | Q(owner=self.request.user)).distinct()
-    
-    def perform_create(self, serializer):
-     serializer.save(owner=self.request.user)
 
+    def get_queryset(self):
+        return (
+            _boards_with_member_count()
+            .filter(
+                Q(members=self.request.user)
+                | Q(owner=self.request.user)
+            )
+            .distinct()
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)

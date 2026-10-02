@@ -22,5 +22,5 @@ urlpatterns = [
     path('api/', include('core.auth_app.api.urls')),
     path('api/boards/', include('core.boards_app.api.urls')),
     path('api/tasks/', include('core.tasks_app.api.urls')),
-   
+
 ]

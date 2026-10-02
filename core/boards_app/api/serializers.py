@@ -13,5 +13,3 @@ class BoardSerializer(serializers.ModelSerializer):
         model = Board
         fields = ('id', 'owner', 'title', 'members', 'member_count')
         read_only_fields = ('owner', 'member_count')
-
-

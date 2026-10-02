@@ -162,7 +162,11 @@ Run Django's checks and the available test suite:
 ```powershell
 python manage.py check
 python manage.py test
+python -m pip install pycodestyle
+python -m pycodestyle core manage.py
 ```
+
+The pycodestyle configuration in `setup.cfg` checks maintained Python code with a 79-character line limit and excludes Django-generated migrations.
 
 ## Project Structure
 
