@@ -1,5 +1,7 @@
 from rest_framework.permissions import IsAuthenticated
 
+from core.auth_app.api.permissions import GuestAccessPermissionMixin
+
 
 def _get_board(obj):
     """Resolve a board from a board, task, or comment instance."""
@@ -13,10 +15,10 @@ def _get_board(obj):
     return None
 
 
-class IsMemberOrOwner(IsAuthenticated):
+class IsMemberOrOwner(GuestAccessPermissionMixin, IsAuthenticated):
     """Allow access when the user owns or belongs to the object's board."""
 
-    def has_object_permission(self, request, view, obj):
+    def _has_non_guest_object_permission(self, request, view, obj):
         board = _get_board(obj)
         if board is None:
             return False
@@ -26,9 +28,9 @@ class IsMemberOrOwner(IsAuthenticated):
         )
 
 
-class IsOwner(IsAuthenticated):
+class IsOwner(GuestAccessPermissionMixin, IsAuthenticated):
     """Restrict board-level actions to the board owner."""
 
-    def has_object_permission(self, request, view, obj):
+    def _has_non_guest_object_permission(self, request, view, obj):
         board = _get_board(obj)
         return board is not None and board.owner_id == request.user.pk

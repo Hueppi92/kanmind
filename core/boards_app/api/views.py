@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from core.boards_app.models import Board
 from core.boards_app.api.serializers import BoardSerializer
 from core.boards_app.api.permissions import IsMemberOrOwner, IsOwner
+from core.auth_app.api.permissions import is_guest_user
 
 
 def _boards_with_member_count():
@@ -34,14 +35,13 @@ class BoardViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
-        return (
-            _boards_with_member_count()
-            .filter(
-                Q(members=self.request.user)
-                | Q(owner=self.request.user)
-            )
-            .distinct()
-        )
+        boards = _boards_with_member_count()
+        if self.action != 'list' or is_guest_user(self.request.user):
+            return boards
+        return boards.filter(
+            Q(members=self.request.user)
+            | Q(owner=self.request.user)
+        ).distinct()
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

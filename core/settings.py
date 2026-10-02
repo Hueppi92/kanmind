@@ -144,9 +144,11 @@ MAILERS = {
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        'core.auth_app.api.permissions.GuestAwareIsAuthenticatedOrReadOnly',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ]
 }
+
+GUEST_USER_EMAIL = 'kevin@kovacsi.de'

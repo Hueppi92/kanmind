@@ -15,6 +15,7 @@ from core.tasks_app.api.permissions import (
     IsMemberOfTask,
     IsTaskCreatorOrBoardOwner,
 )
+from core.auth_app.api.permissions import is_guest_user
 
 
 @api_view(['GET',])
@@ -59,11 +60,12 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer.save(creator=self.request.user)
 
     def get_queryset(self):
+        if self.action != 'list' or is_guest_user(self.request.user):
+            return Task.objects.all()
+
         allowed_tasks = Q(board__members=self.request.user) | Q(
             board__owner=self.request.user
         )
-        if self.action == 'destroy':
-            allowed_tasks |= Q(creator=self.request.user)
         return Task.objects.filter(allowed_tasks).distinct()
 
 
@@ -98,7 +100,7 @@ def task_comments(request, pk):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsMemberOfTask, IsCreatorOfComment])
+@permission_classes([IsCreatorOfComment])
 def task_comment_detail(request, pk, comment_id):
     """Delete a task comment when the authenticated user is its author."""
     task = get_object_or_404(Task, pk=pk)

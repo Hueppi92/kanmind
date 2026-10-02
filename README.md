@@ -50,6 +50,12 @@ Registration and login are public. All other API endpoints require a DRF token. 
 Authorization: Token <token>
 ```
 
+The account configured by `GUEST_USER_EMAIL` (`kevin@kovacsi.de`, matching
+`GUEST_LOGIN.email` in `shared/js/config.js`) bypasses API permissions and can
+read, create, update, and delete all boards, tasks, and comments. Its email is
+reserved during registration. Use this account only in a trusted demo
+environment; guest access is not suitable for production data.
+
 ### Register
 
 `POST /api/registration/`

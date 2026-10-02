@@ -1,13 +1,19 @@
 from rest_framework.permissions import IsAuthenticated
 
+from core.auth_app.api.permissions import (
+    GuestAccessPermissionMixin,
+    is_guest_user,
+)
 from core.boards_app.models import Board
 from core.tasks_app.models import Comment, Task
 
 
-class IsMember(IsAuthenticated):
+class IsMember(GuestAccessPermissionMixin, IsAuthenticated):
     """Require membership to create or modify tasks on a board."""
 
     def has_permission(self, request, view):
+        if is_guest_user(request.user):
+            return True
         if not super().has_permission(request, view):
             return False
         if getattr(view, "action", None) != "create":
@@ -24,7 +30,7 @@ class IsMember(IsAuthenticated):
         except (TypeError, ValueError):
             return False
 
-    def has_object_permission(self, request, view, obj):
+    def _has_non_guest_object_permission(self, request, view, obj):
         board = getattr(obj, "board", None)
         if (
             board is None
@@ -36,10 +42,12 @@ class IsMember(IsAuthenticated):
         return True
 
 
-class IsMemberOfTask(IsAuthenticated):
+class IsMemberOfTask(GuestAccessPermissionMixin, IsAuthenticated):
     """Require membership in the task's board for comment operations."""
 
     def has_permission(self, request, view):
+        if is_guest_user(request.user):
+            return True
         if not super().has_permission(request, view):
             return False
         task_id = getattr(view, "kwargs", {}).get("pk")
@@ -51,10 +59,10 @@ class IsMemberOfTask(IsAuthenticated):
         return task.board.members.filter(pk=request.user.pk).exists()
 
 
-class IsTaskCreatorOrBoardOwner(IsAuthenticated):
+class IsTaskCreatorOrBoardOwner(GuestAccessPermissionMixin, IsAuthenticated):
     """Allow task deletion only to its creator or the board owner."""
 
-    def has_object_permission(self, request, view, obj):
+    def _has_non_guest_object_permission(self, request, view, obj):
         return (
             getattr(obj, "creator_id", None) == request.user.pk
             or getattr(getattr(obj, "board", None), "owner_id", None)
@@ -62,10 +70,12 @@ class IsTaskCreatorOrBoardOwner(IsAuthenticated):
         )
 
 
-class IsCreatorOfComment(IsAuthenticated):
+class IsCreatorOfComment(GuestAccessPermissionMixin, IsAuthenticated):
     """Restrict comment deletion to the comment author."""
 
     def has_permission(self, request, view):
+        if is_guest_user(request.user):
+            return True
         if not super().has_permission(request, view):
             return False
         comment_id = getattr(view, "kwargs", {}).get("comment_id")
@@ -78,5 +88,5 @@ class IsCreatorOfComment(IsAuthenticated):
         ).only("author_id").first()
         return comment is None or comment.author_id == request.user.pk
 
-    def has_object_permission(self, request, view, obj):
+    def _has_non_guest_object_permission(self, request, view, obj):
         return getattr(obj, "author_id", None) == request.user.pk

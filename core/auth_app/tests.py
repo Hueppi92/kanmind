@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -43,6 +44,21 @@ class RegistrationApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('repeated_password', response.data)
         self.assertEqual(User.objects.count(), 0)
+
+    def test_registration_rejects_guest_email(self):
+        response = self.client.post(
+            self.endpoint,
+            {
+                'fullname': 'Guest User',
+                'email': settings.GUEST_USER_EMAIL,
+                'password': 'examplePassword',
+                'repeated_password': 'examplePassword',
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('email', response.data)
 
 
 class LoginApiTests(APITestCase):

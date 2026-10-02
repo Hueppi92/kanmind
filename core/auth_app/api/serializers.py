@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import authenticate
 
 from django.contrib.auth import get_user_model
@@ -27,6 +28,11 @@ class RegistrationSerializer(serializers.Serializer):
 
     def validate_email(self, value):
         email = value.lower()
+        guest_email = getattr(settings, 'GUEST_USER_EMAIL', '')
+        if guest_email and email.casefold() == guest_email.casefold():
+            raise serializers.ValidationError(
+                'This email address is reserved for the guest account.'
+            )
         if User.objects.filter(email__iexact=email).exists():
             raise serializers.ValidationError(
                 'A user with this email address already exists.'
